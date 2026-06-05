@@ -20,11 +20,15 @@ export class Product {
   @Prop()
   image: string;
 
+
   @Prop({ default: 'ACTIVE' })
   status: string;
 
   @Prop({ required: true })
   createdBy: string; // admin/seller id
+
+  @Prop({ required: true })
+sellerId: string;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -11,14 +11,15 @@ export class ProductsService {
     private productModel: Model<ProductDocument>,
   ) {}
 
-  async create(createProductDto: CreateProductDto, userId: string) {
-    const product = await this.productModel.create({
-      ...createProductDto,
-      createdBy: userId,
-    });
+async create(createProductDto: CreateProductDto, userId: string) {
+  const product = await this.productModel.create({
+    ...createProductDto,
+    createdBy: userId,
+    sellerId: userId,
+  });
 
-    return product;
-  }
+  return product;
+}
 
   async findAll() {
     return this.productModel.find();
