@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
@@ -11,7 +15,6 @@ export class ProductsService {
     private productModel: Model<ProductDocument>,
   ) {}
 
-
   async findBySeller(sellerId: string) {
     return this.productModel.find({ sellerId });
   }
@@ -21,48 +24,48 @@ export class ProductsService {
   }
 
   async create(createProductDto: CreateProductDto, userId: string) {
-  const product = await this.productModel.create({
-    ...createProductDto,
-    createdBy: userId,
-    sellerId: userId,
-  });
+    const product = await this.productModel.create({
+      ...createProductDto,
+      createdBy: userId,
+      sellerId: userId,
+    });
 
-  return product;
-}
-
-async update(id: string, updateData: any, user: any) {
-  const product = await this.productModel.findById(id);
-
-  if (!product) {
-    throw new Error('Product not found');
+    return product;
   }
 
-  if (
-    product.sellerId.toString() !== user.id &&
-    user.role !== 'ADMIN'
-  ) {
-    throw new Error('Unauthorized');
+  async update(id: string, updateData: any, user: any) {
+    const product = await this.productModel.findById(id);
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (
+      product.sellerId.toString() !== user.id &&
+      user.role !== 'ADMIN'
+    ) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.productModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
   }
 
-  return this.productModel.findByIdAndUpdate(id, updateData, {
-    new: true,
-  });
-}
+  async remove(id: string, user: any) {
+    const product = await this.productModel.findById(id);
 
-async remove(id: string, user: any) {
-  const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
 
-  if (!product) {
-    throw new Error('Product not found');
+    if (
+      product.sellerId.toString() !== user.id &&
+      user.role !== 'ADMIN'
+    ) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.productModel.findByIdAndDelete(id);
   }
-
-  if (
-    product.sellerId.toString() !== user.id &&
-    user.role !== 'ADMIN'
-  ) {
-    throw new Error('Unauthorized');
-  }
-
-  return this.productModel.findByIdAndDelete(id);
-}
 }
