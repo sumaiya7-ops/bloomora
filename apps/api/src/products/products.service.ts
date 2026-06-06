@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
@@ -11,7 +11,16 @@ export class ProductsService {
     private productModel: Model<ProductDocument>,
   ) {}
 
-async create(createProductDto: CreateProductDto, userId: string) {
+
+  async findBySeller(sellerId: string) {
+    return this.productModel.find({ sellerId });
+  }
+
+  async findAll() {
+    return this.productModel.find();
+  }
+
+  async create(createProductDto: CreateProductDto, userId: string) {
   const product = await this.productModel.create({
     ...createProductDto,
     createdBy: userId,
@@ -21,7 +30,39 @@ async create(createProductDto: CreateProductDto, userId: string) {
   return product;
 }
 
-  async findAll() {
-    return this.productModel.find();
+async update(id: string, updateData: any, user: any) {
+  const product = await this.productModel.findById(id);
+
+  if (!product) {
+    throw new Error('Product not found');
   }
+
+  if (
+    product.sellerId.toString() !== user.id &&
+    user.role !== 'ADMIN'
+  ) {
+    throw new Error('Unauthorized');
+  }
+
+  return this.productModel.findByIdAndUpdate(id, updateData, {
+    new: true,
+  });
+}
+
+async remove(id: string, user: any) {
+  const product = await this.productModel.findById(id);
+
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
+  if (
+    product.sellerId.toString() !== user.id &&
+    user.role !== 'ADMIN'
+  ) {
+    throw new Error('Unauthorized');
+  }
+
+  return this.productModel.findByIdAndDelete(id);
+}
 }
