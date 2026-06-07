@@ -41,6 +41,10 @@ async create(createUserDto: CreateUserDto) {
   return user;
 }
 
+async findByEmail(email: string) {
+  return this.userModel.findOne({ email });
+}
+
 async login(email: string, password: string) {
   const user = await this.userModel.findOne({ email });
 

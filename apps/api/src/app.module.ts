@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
-import { JwtModule } from '@nestjs/jwt';
 import { OrdersModule } from './orders/orders.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -14,15 +16,22 @@ import { OrdersModule } from './orders/orders.module';
 
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
 
-    JwtModule.register({
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
       global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRES as any },
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') as string,
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES') || '7d',
+        },
+      }),
     }),
 
     UsersModule,
-    ProductsModule, // 👈 ADD THIS LINE
-     OrdersModule, // ✅ ADD THIS
+    ProductsModule,
+    OrdersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

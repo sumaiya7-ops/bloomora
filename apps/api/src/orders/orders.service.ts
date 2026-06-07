@@ -54,19 +54,32 @@ export class OrdersService {
   async findAll() {
     return this.orderModel.find();
   }
+async updateStatus(id: string, status: string, user: any) {
+  const order = await this.orderModel.findById(id);
 
-  async updateStatus(id: string, status: string, user: any) {
-    const order = await this.orderModel.findById(id);
-
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-
-    if (user.role !== 'ADMIN') {
-      throw new UnauthorizedException('Only admin can update status');
-    }
-
-    order.status = status;
-    return order.save();
+  if (!order) {
+    throw new NotFoundException('Order not found');
   }
+
+  if (user.role !== 'ADMIN') {
+    throw new UnauthorizedException('Only admin can update status');
+  }
+
+  const product = await this.productModel.findById(order.productId);
+
+  if (!product) {
+    throw new NotFoundException('Product not found');
+  }
+
+  // CANCEL হলে stock ফেরত যাবে
+  if (status === 'CANCELLED') {
+    product.stock += order.quantity;
+    await product.save();
+  }
+
+  order.status = status;
+  await order.save();
+
+  return order;
+}
 }
