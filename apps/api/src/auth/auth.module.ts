@@ -8,13 +8,15 @@ import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
     UsersModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET as string,
-      signOptions: { expiresIn: '7d' },
-    }),
+  JwtModule.register({
+  secret: 'super_secret_key',
+  signOptions: { expiresIn: '7d' },
+})
+   
   ],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [JwtModule],
 })
 export class AuthModule {}
+

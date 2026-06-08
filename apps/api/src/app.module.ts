@@ -16,17 +16,13 @@ import { AuthModule } from './auth/auth.module';
 
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
 
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      global: true,
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') as string,
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES') || '7d',
-        },
-      }),
-    }),
+JwtModule.register({
+  global: true,
+  secret: 'super_secret_key',
+  signOptions: {
+    expiresIn: '7d',
+  },
+}),
 
     UsersModule,
     ProductsModule,
@@ -35,3 +31,4 @@ import { AuthModule } from './auth/auth.module';
   ],
 })
 export class AppModule {}
+

@@ -15,7 +15,7 @@ export class Order {
   quantity: number;
 
   @Prop({
-    enum: ['PENDING', 'CONFIRMED', 'CANCELLED'],
+    enum: ['PENDING', 'APPROVED', 'CANCELLED'],
     default: 'PENDING',
   })
   status: string;
